@@ -11,7 +11,7 @@ scrape_configs:
         - http://vp-auth-service:8000/health
         - http://vp-video-service:8000/health
         - http://host.docker.internal:32514/health
-        - http://vp-notification-service:8000/health
+        - http://host.docker.internal:32515/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -39,4 +39,4 @@ scrape_configs:
         - 'vp-auth-service:8000'
         - 'vp-video-service:8000'
         - 'host.docker.internal:32514'
-        - 'vp-notification-service:8000'
+        - 'host.docker.internal:32515'
