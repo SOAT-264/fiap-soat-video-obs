@@ -9,9 +9,28 @@ scrape_configs:
     static_configs:
       - targets:
         - http://host.docker.internal:32513/health
+        labels:
+          service: auth
+          service_name: Auth Service
+          service_context: identity
+      - targets:
         - http://host.docker.internal:32516/health
+        labels:
+          service: video
+          service_name: Video Service
+          service_context: video-management
+      - targets:
         - http://host.docker.internal:32514/health
+        labels:
+          service: jobs
+          service_name: Job Service
+          service_context: processing
+      - targets:
         - http://host.docker.internal:32515/health
+        labels:
+          service: notifications
+          service_name: Notification Service
+          service_context: messaging
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -35,8 +54,27 @@ scrape_configs:
   - job_name: 'video-services'
     metrics_path: '/metrics'
     static_configs:
-      - targets: 
+      - targets:
         - 'host.docker.internal:32513'
+        labels:
+          service: auth
+          service_name: Auth Service
+          service_context: identity
+      - targets:
         - 'host.docker.internal:32516'
+        labels:
+          service: video
+          service_name: Video Service
+          service_context: video-management
+      - targets:
         - 'host.docker.internal:32514'
+        labels:
+          service: jobs
+          service_name: Job Service
+          service_context: processing
+      - targets:
         - 'host.docker.internal:32515'
+        labels:
+          service: notifications
+          service_name: Notification Service
+          service_context: messaging

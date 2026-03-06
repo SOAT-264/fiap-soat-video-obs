@@ -447,7 +447,7 @@
 					},
 					"editorMode": "code",
 					  "expr": "probe_success{job=\"service-health\"}",
-					"legendFormat": "{{instance}}",
+					"legendFormat": "{{service_name}}",
 					"range": true,
 					"refId": "A"
 				}
@@ -497,7 +497,7 @@
 					},
 					"editorMode": "code",
 					  "expr": "probe_http_status_code{job=\"service-health\"}",
-					"legendFormat": "{{instance}}",
+					"legendFormat": "{{service_name}}",
 					"range": true,
 					"refId": "A"
 				}
@@ -560,7 +560,7 @@
 					},
 					"editorMode": "code",
 					"expr": "rate(process_cpu_seconds_total{job=\"video-services\"}[5m])",
-					"legendFormat": "{{instance}}",
+					"legendFormat": "{{service_name}}",
 					"range": true,
 					"refId": "A"
 				}
@@ -610,7 +610,7 @@
 					},
 					"editorMode": "code",
 					"expr": "process_resident_memory_bytes{job=\"video-services\"}",
-					"legendFormat": "{{instance}}",
+					"legendFormat": "{{service_name}}",
 					"range": true,
 					"refId": "A"
 				}
@@ -660,7 +660,7 @@
 					},
 					"editorMode": "code",
 					"expr": "rate(python_gc_objects_collected_total{job=\"video-services\"}[5m])",
-					"legendFormat": "{{instance}} - geração {{generation}}",
+					"legendFormat": "{{service_name}} - geração {{generation}}",
 					"range": true,
 					"refId": "A"
 				}
