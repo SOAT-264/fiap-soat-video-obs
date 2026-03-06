@@ -8,7 +8,7 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
-        - http://vp-auth-service:8000/health
+        - http://host.docker.internal:32513/health
         - http://host.docker.internal:32516/health
         - http://host.docker.internal:32514/health
         - http://host.docker.internal:32515/health
@@ -36,7 +36,7 @@ scrape_configs:
     metrics_path: '/metrics'
     static_configs:
       - targets: 
-        - 'vp-auth-service:8000'
+        - 'host.docker.internal:32513'
         - 'host.docker.internal:32516'
         - 'host.docker.internal:32514'
         - 'host.docker.internal:32515'
