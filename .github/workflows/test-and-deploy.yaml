@@ -1,0 +1,94 @@
+name: Deploy Observability Stack
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  deploy:
+    if: github.event_name == 'push'
+    runs-on:
+      - self-hosted
+      - pc-wee
+      - X64
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: powershell
+
+    steps:
+      - name: Checkout observability repository
+        uses: actions/checkout@v4
+        with:
+          path: fiap-soat-video-obs
+
+      - name: Validate runner tooling
+        working-directory: ${{ github.workspace }}
+        run: |
+          $requiredCommands = @("docker", "git")
+
+          foreach ($command in $requiredCommands) {
+              if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
+                  throw "Command '$command' was not found on the runner."
+              }
+          }
+
+          docker version
+          docker compose version
+
+      - name: Deploy observability stack
+        working-directory: ${{ github.workspace }}/fiap-soat-video-obs
+        run: docker compose up -d --remove-orphans
+
+      - name: Verify observability containers are running
+        run: |
+          $containers = @(
+            "vp-prometheus",
+            "vp-grafana",
+            "vp-loki",
+            "vp-blackbox-exporter"
+          )
+
+          foreach ($container in $containers) {
+            $running = docker ps --filter "name=^/$container$" --format "{{.Names}}"
+
+            if ($running -ne $container) {
+              throw "Container '$container' is not running."
+            }
+          }
+
+      - name: Verify observability readiness endpoints
+        run: |
+          $checks = @(
+            @{ Name = "prometheus"; Url = "http://vp-prometheus:9090/-/ready" },
+            @{ Name = "grafana"; Url = "http://vp-grafana:3000/api/health" },
+            @{ Name = "loki"; Url = "http://vp-loki:3100/ready" },
+            @{ Name = "blackbox"; Url = "http://vp-blackbox-exporter:9115/-/healthy" }
+          )
+
+          foreach ($check in $checks) {
+            $ready = $false
+
+            for ($attempt = 1; $attempt -le 6; $attempt++) {
+              docker run --rm --network video-processor-network curlimages/curl:8.12.1 -fsS $check.Url *> $null
+
+              if ($LASTEXITCODE -eq 0) {
+                $ready = $true
+                break
+              }
+
+              Start-Sleep -Seconds 10
+            }
+
+            if (-not $ready) {
+              throw "Readiness check failed for '$($check.Name)' at '$($check.Url)'."
+            }
+          }
