@@ -84,6 +84,13 @@ jobs:
 
       - name: Verify observability readiness endpoints
         run: |
+          $curlImage = "curlimages/curl:8.12.1"
+          cmd /c "docker pull $curlImage >nul 2>&1"
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Unable to pull required image '$curlImage' for readiness checks."
+          }
+
           $checks = @(
             @{ Name = "prometheus"; Url = "http://vp-prometheus:9090/-/ready" },
             @{ Name = "grafana"; Url = "http://vp-grafana:3000/api/health" },
@@ -95,7 +102,7 @@ jobs:
             $ready = $false
 
             for ($attempt = 1; $attempt -le 6; $attempt++) {
-              docker run --rm --network video-processor-network curlimages/curl:8.12.1 -fsS $check.Url *> $null
+              cmd /c "docker run --rm --network video-processor-network $curlImage -fsS $($check.Url) >nul 2>&1"
 
               if ($LASTEXITCODE -eq 0) {
                 $ready = $true
