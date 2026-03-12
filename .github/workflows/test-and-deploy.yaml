@@ -44,6 +44,23 @@ jobs:
           docker version
           docker compose version
 
+      - name: Cleanup conflicting observability containers
+        run: |
+          $containers = @(
+            "vp-prometheus",
+            "vp-grafana",
+            "vp-loki",
+            "vp-blackbox-exporter"
+          )
+
+          foreach ($container in $containers) {
+            $existing = docker ps -a --filter "name=^/$container$" --format "{{.ID}}"
+
+            if (-not [string]::IsNullOrWhiteSpace($existing)) {
+              docker rm -f $container *> $null
+            }
+          }
+
       - name: Deploy observability stack
         working-directory: ${{ github.workspace }}/fiap-soat-video-obs
         run: docker compose up -d --remove-orphans
